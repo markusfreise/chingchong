@@ -25,11 +25,11 @@ class TimeEntryController extends Controller
         }
 
         if ($request->has('filter.project_id')) {
-            $query->where('project_id', $request->get('filter.project_id'));
+            $query->where('project_id', $request->input('filter.project_id'));
         }
 
         if ($request->has('filter.task_id')) {
-            $query->where('task_id', $request->get('filter.task_id'));
+            $query->where('task_id', $request->input('filter.task_id'));
         }
 
         if ($request->has('filter.is_billable')) {
@@ -37,18 +37,18 @@ class TimeEntryController extends Controller
         }
 
         if ($request->has('filter.date_from')) {
-            $query->where('started_at', '>=', $request->get('filter.date_from'));
+            $query->where('started_at', '>=', $request->input('filter.date_from'));
         }
 
         if ($request->has('filter.date_to')) {
-            $query->where('started_at', '<=', $request->get('filter.date_to') . ' 23:59:59');
+            $query->where('started_at', '<=', $request->input('filter.date_to') . ' 23:59:59');
         }
 
         if ($request->has('filter.is_running')) {
             $query->where('is_running', $request->boolean('filter.is_running'));
         }
 
-        $sort = $request->get('sort', '-started_at');
+        $sort = $request->input('sort', '-started_at');
         $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
         $column = ltrim($sort, '-');
         $query->orderBy($column, $direction);

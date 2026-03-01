@@ -20,7 +20,7 @@ class ProjectController extends Controller
             ->withCount('tasks');
 
         if ($request->has('filter.client_id')) {
-            $query->where('client_id', $request->get('filter.client_id'));
+            $query->where('client_id', $request->input('filter.client_id'));
         }
 
         if ($request->has('filter.is_active')) {
@@ -35,7 +35,7 @@ class ProjectController extends Controller
             $query->with('timeEntries');
         }
 
-        $sort = $request->get('sort', 'name');
+        $sort = $request->input('sort', 'name');
         $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
         $column = ltrim($sort, '-');
         $query->orderBy($column, $direction);

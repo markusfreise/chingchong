@@ -22,7 +22,7 @@ class ClientController extends Controller
             $query->where('is_active', $request->boolean('filter.is_active'));
         }
 
-        $sort = $request->get('sort', 'name');
+        $sort = $request->input('sort', 'name');
         $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
         $column = ltrim($sort, '-');
         $query->orderBy($column, $direction);

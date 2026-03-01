@@ -20,7 +20,7 @@ class ReportController extends Controller
         ]);
 
         $query = $this->buildReportQuery($request);
-        $groupBy = $request->get('group_by', 'project');
+        $groupBy = $request->input('group_by', 'project');
 
         $results = match ($groupBy) {
             'project' => $this->groupByProject($query),
@@ -37,8 +37,8 @@ class ReportController extends Controller
         return response()->json([
             'data' => $results,
             'meta' => [
-                'date_from' => $request->get('date_from'),
-                'date_to' => $request->get('date_to'),
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
                 'group_by' => $groupBy,
                 'totals' => $totals,
             ],
@@ -61,8 +61,8 @@ class ReportController extends Controller
         return response()->json([
             'data' => $entries->items(),
             'meta' => [
-                'date_from' => $request->get('date_from'),
-                'date_to' => $request->get('date_to'),
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
                 'current_page' => $entries->currentPage(),
                 'last_page' => $entries->lastPage(),
                 'per_page' => $entries->perPage(),
@@ -93,7 +93,7 @@ class ReportController extends Controller
             ->orderBy('projects.name');
 
         if ($request->has('filter.client_id')) {
-            $query->where('projects.client_id', $request->get('filter.client_id'));
+            $query->where('projects.client_id', $request->input('filter.client_id'));
         }
 
         $projects = $query->get()->map(function ($row) {
@@ -135,8 +135,8 @@ class ReportController extends Controller
         $users = DB::table('users')
             ->leftJoin('time_entries', function ($join) use ($request) {
                 $join->on('time_entries.user_id', '=', 'users.id')
-                    ->where('time_entries.started_at', '>=', $request->get('date_from'))
-                    ->where('time_entries.started_at', '<=', $request->get('date_to') . ' 23:59:59');
+                    ->where('time_entries.started_at', '>=', $request->input('date_from'))
+                    ->where('time_entries.started_at', '<=', $request->input('date_to') . ' 23:59:59');
             })
             ->select(
                 'users.id',
@@ -168,8 +168,8 @@ class ReportController extends Controller
         return response()->json([
             'data' => $users,
             'meta' => [
-                'date_from' => $request->get('date_from'),
-                'date_to' => $request->get('date_to'),
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
             ],
         ]);
     }
@@ -224,23 +224,23 @@ class ReportController extends Controller
             ->whereNotNull('duration_seconds');
 
         if ($request->has('date_from')) {
-            $query->where('started_at', '>=', $request->get('date_from'));
+            $query->where('started_at', '>=', $request->input('date_from'));
         }
 
         if ($request->has('date_to')) {
-            $query->where('started_at', '<=', $request->get('date_to') . ' 23:59:59');
+            $query->where('started_at', '<=', $request->input('date_to') . ' 23:59:59');
         }
 
         if ($request->has('filter.project_id')) {
-            $query->where('project_id', $request->get('filter.project_id'));
+            $query->where('project_id', $request->input('filter.project_id'));
         }
 
         if ($request->has('filter.client_id')) {
-            $query->whereHas('project', fn ($q) => $q->where('client_id', $request->get('filter.client_id')));
+            $query->whereHas('project', fn ($q) => $q->where('client_id', $request->input('filter.client_id')));
         }
 
         if ($request->has('filter.user_id')) {
-            $query->where('user_id', $request->get('filter.user_id'));
+            $query->where('user_id', $request->input('filter.user_id'));
         }
 
         if ($request->has('filter.is_billable')) {
@@ -248,7 +248,7 @@ class ReportController extends Controller
         }
 
         if ($request->has('filter.tag_ids')) {
-            $tagIds = explode(',', $request->get('filter.tag_ids'));
+            $tagIds = explode(',', $request->input('filter.tag_ids'));
             $query->whereHas('tags', fn ($q) => $q->whereIn('tags.id', $tagIds));
         }
 

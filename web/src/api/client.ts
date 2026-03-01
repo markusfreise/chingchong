@@ -15,10 +15,14 @@ export async function getCsrfCookie(): Promise<void> {
 }
 
 // Response interceptor for auth errors
+// Skip redirect for /auth/* endpoints — the auth store and router guard handle those.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (
+      error.response?.status === 401 &&
+      !error.config?.url?.startsWith('/auth/')
+    ) {
       window.location.href = '/login'
     }
     return Promise.reject(error)

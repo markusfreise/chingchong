@@ -62,11 +62,19 @@ class TimeEntryController extends Controller
         $data['user_id'] = $request->user()->id;
         $data['source'] = $data['source'] ?? 'manual';
 
-        if (isset($data['stopped_at']) && !isset($data['duration_seconds'])) {
+        // Duration-only manual entry: compute started_at/stopped_at from date + duration
+        if (isset($data['duration_seconds']) && !isset($data['started_at'])) {
+            $date = $data['date'] ?? now()->toDateString();
+            $data['started_at'] = \Carbon\Carbon::parse($date)->startOfDay();
+            $data['stopped_at'] = $data['started_at']->copy()->addSeconds($data['duration_seconds']);
+            $data['is_running'] = false;
+        } elseif (isset($data['stopped_at']) && !isset($data['duration_seconds'])) {
             $started = \Carbon\Carbon::parse($data['started_at']);
             $stopped = \Carbon\Carbon::parse($data['stopped_at']);
             $data['duration_seconds'] = $started->diffInSeconds($stopped);
         }
+
+        unset($data['date']);
 
         $tagIds = $data['tag_ids'] ?? [];
         unset($data['tag_ids']);

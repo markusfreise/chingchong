@@ -17,12 +17,42 @@ const projectId = ref('')
 const taskId = ref('')
 const description = ref('')
 const date = ref(new Date().toISOString().split('T')[0]!)
-const startTime = ref('09:00')
-const endTime = ref('10:00')
+const duration = ref('')
 const isBillable = ref(true)
 const tasks = ref<Task[]>([])
 const saving = ref(false)
 const error = ref('')
+
+function parseDuration(input: string): number | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  // "1:30" or "1.30" -> 1h 30m, "1:" or "1." -> 1h 0m
+  const match = trimmed.match(/^(\d+)[\:\.](\d{0,2})$/)
+  if (match) {
+    const hours = parseInt(match[1]!, 10)
+    const minutes = match[2] ? parseInt(match[2]!, 10) : 0
+    return (hours * 60 + minutes) * 60
+  }
+
+  // Plain number -> minutes
+  const num = parseInt(trimmed, 10)
+  if (!isNaN(num) && num > 0) {
+    return num * 60
+  }
+
+  return null
+}
+
+function durationHint(): string {
+  const seconds = parseDuration(duration.value)
+  if (seconds === null) return ''
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0 && m > 0) return `= ${h}h ${m}m`
+  if (h > 0) return `= ${h}h`
+  return `= ${m}m`
+}
 
 async function loadTasks() {
   if (!projectId.value) return
@@ -32,14 +62,20 @@ async function loadTasks() {
 
 async function handleSave() {
   error.value = ''
+  const seconds = parseDuration(duration.value)
+  if (!seconds) {
+    error.value = 'Enter a valid duration, e.g. 1:30, 1.5, or 90'
+    return
+  }
+
   saving.value = true
   try {
     await api.post('/time-entries', {
       project_id: projectId.value,
       task_id: taskId.value || null,
       description: description.value || null,
-      started_at: `${date.value}T${startTime.value}:00`,
-      stopped_at: `${date.value}T${endTime.value}:00`,
+      date: date.value,
+      duration_seconds: seconds,
       is_billable: isBillable.value,
       source: 'manual',
     })
@@ -93,18 +129,21 @@ async function handleSave() {
           <input v-model="description" type="text" class="form-input" placeholder="What did you work on?" />
         </div>
 
-        <div class="form-row-3">
+        <div class="form-row-2">
           <div class="form-group">
             <label class="form-label">Date *</label>
             <input v-model="date" type="date" class="form-input" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Start *</label>
-            <input v-model="startTime" type="time" class="form-input" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">End *</label>
-            <input v-model="endTime" type="time" class="form-input" required />
+            <label class="form-label">Duration *</label>
+            <input
+              v-model="duration"
+              type="text"
+              class="form-input"
+              placeholder="1:30 or 90"
+              required
+            />
+            <span v-if="durationHint()" class="form-hint">{{ durationHint() }}</span>
           </div>
         </div>
 
@@ -150,8 +189,12 @@ async function handleSave() {
   @apply rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200;
 }
 
-.form-row-3 {
-  @apply grid grid-cols-3 gap-3;
+.form-row-2 {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.form-hint {
+  @apply text-xs text-gray-500 mt-1;
 }
 
 .form-checkbox-label {

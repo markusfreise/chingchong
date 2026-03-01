@@ -15,12 +15,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
+        target: process.env.VITE_API_PROXY_TARGET || 'http://nginx:80',
       },
       '/sanctum': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
+        target: process.env.VITE_API_PROXY_TARGET || 'http://nginx:80',
       },
     },
   },

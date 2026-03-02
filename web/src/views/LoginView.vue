@@ -31,7 +31,7 @@ async function handleLogin() {
     <div class="login-card">
       <div class="login-header">
         <ClockIcon class="login-logo" />
-        <h1 class="login-title">chingchong</h1>
+        <h1 class="login-title">klingeLING!</h1>
         <p class="login-subtitle">Sign in to your account</p>
       </div>
 

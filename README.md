@@ -16,7 +16,12 @@ This is mind blowing.
 - Hourly rates based on users, clients, projects and tasks
 - Time tracking reports
 - Harvest import
+
+## Features in development
+
+- Menu bar app for quick time tracking (coming soon)
 - Asana integration (coming soon)
 - Lexware integration (coming soon)
 - API for custom integrations (coming soon)
 - Customizable UI for branding and user preferences (coming soon)
+- Hosted version with user management and team collaboration (coming soon)

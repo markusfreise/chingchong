@@ -6,16 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
-use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TaskController extends Controller
 {
-    public function index(Project $project): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $tasks = $project->tasks()
+        $tasks = Task::query()
             ->where('is_active', true)
             ->orderBy('name')
             ->get();

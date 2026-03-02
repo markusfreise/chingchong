@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import api from '@/api/client'
 import { useTimerStore } from '@/stores/timer'
 import { useAuthStore } from '@/stores/auth'
-import type { TimeEntry, Project } from '@/types'
+import type { TimeEntry, Project, Task } from '@/types'
 import TimerWidget from '@/components/TimerWidget.vue'
 import {
   ClockIcon,
@@ -18,6 +18,7 @@ const auth = useAuthStore()
 const todayEntries = ref<TimeEntry[]>([])
 const weekEntries = ref<TimeEntry[]>([])
 const projects = ref<Project[]>([])
+const tasks = ref<Task[]>([])
 const loading = ref(true)
 
 const todayHours = computed(() => {
@@ -63,7 +64,7 @@ onMounted(async () => {
   const weekStartStr = weekStart.toISOString().split('T')[0]
 
   try {
-    const [todayRes, weekRes, projectsRes] = await Promise.all([
+    const [todayRes, weekRes, projectsRes, tasksRes] = await Promise.all([
       api.get('/time-entries', {
         params: { 'filter[date_from]': today, 'filter[date_to]': today, per_page: 100 },
       }),
@@ -73,10 +74,12 @@ onMounted(async () => {
       api.get('/projects', {
         params: { 'filter[is_active]': true, per_page: 100, include_time_summary: true },
       }),
+      api.get('/tasks'),
     ])
     todayEntries.value = todayRes.data.data
     weekEntries.value = weekRes.data.data
     projects.value = projectsRes.data.data
+    tasks.value = tasksRes.data.data
   } finally {
     loading.value = false
   }
@@ -91,7 +94,7 @@ onMounted(async () => {
     </h1>
 
     <!-- Timer widget -->
-    <TimerWidget :projects="projects" class="dashboard-timer" />
+    <TimerWidget :projects="projects" :tasks="tasks" class="dashboard-timer" />
 
     <!-- Stats -->
     <div class="dashboard-stats">

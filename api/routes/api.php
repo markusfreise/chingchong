@@ -28,11 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Projects
     Route::apiResource('projects', ProjectController::class);
 
-    // Tasks
-    Route::get('/projects/{project}/tasks', [TaskController::class, 'index']);
-    Route::post('/tasks', [TaskController::class, 'store']);
-    Route::put('/tasks/{task}', [TaskController::class, 'update']);
-    Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
+    // Tasks (workspace-global)
+    Route::apiResource('tasks', TaskController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Time Entries
     Route::post('/time-entries/start', [TimeEntryController::class, 'start']);

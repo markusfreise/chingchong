@@ -23,6 +23,7 @@ class TimeEntry extends Model
         'is_billable',
         'is_running',
         'source',
+        'harvest_id',
         'asana_task_gid',
     ];
 

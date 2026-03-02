@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useTimerStore } from '@/stores/timer'
-import api from '@/api/client'
 import type { Project, Task } from '@/types'
 import { PlayIcon, StopIcon } from '@heroicons/vue/24/solid'
 
 const props = defineProps<{
   projects: Project[]
+  tasks: Task[]
 }>()
 
 const timer = useTimerStore()
@@ -14,24 +14,6 @@ const timer = useTimerStore()
 const selectedProjectId = ref('')
 const selectedTaskId = ref('')
 const description = ref('')
-const tasks = ref<Task[]>([])
-const loadingTasks = ref(false)
-
-const selectedProject = computed(() => props.projects.find((p) => p.id === selectedProjectId.value))
-
-async function loadTasks() {
-  if (!selectedProjectId.value) {
-    tasks.value = []
-    return
-  }
-  loadingTasks.value = true
-  try {
-    const { data } = await api.get(`/projects/${selectedProjectId.value}/tasks`)
-    tasks.value = data.data
-  } finally {
-    loadingTasks.value = false
-  }
-}
 
 async function handleStart() {
   if (!selectedProjectId.value) return
@@ -48,7 +30,6 @@ onMounted(() => {
     selectedProjectId.value = timer.runningEntry.project_id
     selectedTaskId.value = timer.runningEntry.task_id || ''
     description.value = timer.runningEntry.description || ''
-    loadTasks()
   }
 })
 </script>
@@ -89,22 +70,14 @@ onMounted(() => {
 
     <div v-if="!timer.isRunning" class="timer-inputs">
       <div class="timer-row">
-        <select
-          v-model="selectedProjectId"
-          class="form-select timer-select"
-          @change="selectedTaskId = ''; loadTasks()"
-        >
+        <select v-model="selectedProjectId" class="form-select timer-select">
           <option value="">Select project...</option>
           <option v-for="project in projects" :key="project.id" :value="project.id">
             {{ project.client?.name ? `${project.client.name} / ` : '' }}{{ project.name }}
           </option>
         </select>
 
-        <select
-          v-model="selectedTaskId"
-          class="form-select timer-select"
-          :disabled="!selectedProjectId || tasks.length === 0"
-        >
+        <select v-model="selectedTaskId" class="form-select timer-select" :disabled="tasks.length === 0">
           <option value="">Select task (optional)</option>
           <option v-for="task in tasks" :key="task.id" :value="task.id">
             {{ task.name }}

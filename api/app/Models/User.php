@@ -19,6 +19,7 @@ class User extends Authenticatable
         'password',
         'role',
         'asana_user_gid',
+        'harvest_id',
         'avatar_url',
         'is_active',
     ];

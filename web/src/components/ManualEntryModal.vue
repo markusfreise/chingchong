@@ -6,6 +6,7 @@ import { XMarkIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{
   projects: Project[]
+  tasks: Task[]
 }>()
 
 const emit = defineEmits<{
@@ -19,7 +20,6 @@ const description = ref('')
 const date = ref(new Date().toISOString().split('T')[0]!)
 const duration = ref('')
 const isBillable = ref(true)
-const tasks = ref<Task[]>([])
 const saving = ref(false)
 const error = ref('')
 
@@ -52,12 +52,6 @@ function durationHint(): string {
   if (h > 0 && m > 0) return `= ${h}h ${m}m`
   if (h > 0) return `= ${h}h`
   return `= ${m}m`
-}
-
-async function loadTasks() {
-  if (!projectId.value) return
-  const { data } = await api.get(`/projects/${projectId.value}/tasks`)
-  tasks.value = data.data
 }
 
 async function handleSave() {
@@ -107,7 +101,7 @@ async function handleSave() {
             v-model="projectId"
             class="form-select"
             required
-            @change="taskId = ''; loadTasks()"
+            @change="taskId = ''"
           >
             <option value="">Select project</option>
             <option v-for="p in projects" :key="p.id" :value="p.id">

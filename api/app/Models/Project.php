@@ -19,6 +19,7 @@ class Project extends Model
         'slug',
         'color',
         'asana_project_gid',
+        'harvest_id',
         'budget_hours',
         'hourly_rate',
         'is_billable',
@@ -49,11 +50,6 @@ class Project extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
-    }
-
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 
     public function timeEntries(): HasMany

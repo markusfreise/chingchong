@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import api from '@/api/client'
-import type { TimeEntry, Project } from '@/types'
+import type { TimeEntry, Project, Task } from '@/types'
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import ManualEntryModal from '@/components/ManualEntryModal.vue'
 
 const entries = ref<TimeEntry[]>([])
 const projects = ref<Project[]>([])
+const tasks = ref<Task[]>([])
 const loading = ref(true)
 const showManualEntry = ref(false)
 const meta = ref({ current_page: 1, last_page: 1, total: 0 })
@@ -69,11 +70,13 @@ function onEntryCreated() {
 watch([dateFrom, dateTo, filterProjectId], () => fetchEntries())
 
 onMounted(async () => {
-  const [, projectsRes] = await Promise.all([
+  const [, projectsRes, tasksRes] = await Promise.all([
     fetchEntries(),
     api.get('/projects', { params: { 'filter[is_active]': true, per_page: 100 } }),
+    api.get('/tasks'),
   ])
   projects.value = projectsRes.data.data
+  tasks.value = tasksRes.data.data
 })
 </script>
 
@@ -192,6 +195,7 @@ onMounted(async () => {
     <ManualEntryModal
       v-if="showManualEntry"
       :projects="projects"
+      :tasks="tasks"
       @close="showManualEntry = false"
       @created="onEntryCreated"
     />

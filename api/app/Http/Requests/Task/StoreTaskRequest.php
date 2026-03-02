@@ -14,7 +14,6 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_id' => ['required', 'uuid', 'exists:projects,id'],
             'name' => ['required', 'string', 'max:255'],
         ];
     }

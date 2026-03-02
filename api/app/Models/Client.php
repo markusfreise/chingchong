@@ -19,6 +19,7 @@ class Client extends Model
         'color',
         'is_active',
         'notes',
+        'harvest_id',
     ];
 
     protected function casts(): array
